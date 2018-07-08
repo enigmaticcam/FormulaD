@@ -67,6 +67,10 @@
     <Content Include="Data\RawData\GridChain.txt">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="Data\RawData\Map.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Data\RawData\Formula D advanced.pdf" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
