@@ -2,7 +2,6 @@
 
 namespace FormulaD_Logic.Data {
     public class Grid {
-        public int GridId { get; set; }
         public int SpotNumber { get; set; }
         public bool IsStart { get; set; }
         public bool IsFinish { get; set; }

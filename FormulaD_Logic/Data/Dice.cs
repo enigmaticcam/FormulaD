@@ -2,7 +2,6 @@
 
 namespace FormulaD_Logic.Data {
     public class Die {
-        public int DieId { get; set; }
         public int DieNum { get; set; }
         public int DieMin { get; set; }
         public int DieMax { get; set; }

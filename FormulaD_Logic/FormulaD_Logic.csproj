@@ -43,30 +43,16 @@
     <Compile Include="Data\Dice.cs" />
     <Compile Include="Data\Grid.cs" />
     <Compile Include="Data\GridChain.cs" />
-    <Compile Include="Data\Repository.cs" />
+    <Compile Include="Data\Tracks\Monaco.cs" />
     <Compile Include="Data\Result.cs" />
     <Compile Include="Data\Roll.cs" />
     <Compile Include="Data\Spot.cs" />
+    <Compile Include="Data\Track.cs" />
     <Compile Include="Logic\Actions\GetChildren.cs" />
     <Compile Include="Logic\Logic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\RawData\Dice.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\RawData\Direction.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\RawData\FormulaD.accdb">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\RawData\Grid.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Data\RawData\GridChain.txt">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="Data\RawData\Map.jpg" />
   </ItemGroup>
   <ItemGroup>

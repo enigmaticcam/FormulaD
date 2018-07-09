@@ -1,11 +1,10 @@
 ﻿using FormulaD_Logic.Data;
+using FormulaD_Logic.Data.Tracks;
 using FormulaD_Logic.Logic.Actions;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace FormulaD_Logic.Logic {
     public class BuildResults {
-        private Repository _repository = new Repository();
+        private Track _track = new Monaco();
         private ResultRef _results = new ResultRef();
         private int _laps;
         
@@ -17,7 +16,7 @@ namespace FormulaD_Logic.Logic {
         }
 
         private void CalculateAllMoves() {
-            ActionGetChildren action = new ActionGetChildren(_repository.GetGridChain, _repository.GetDice, _repository.GetGrid);
+            ActionGetChildren action = new ActionGetChildren(_track.Chain, _track.Dice, _track.Grid);
             action.Perform();
         }
 

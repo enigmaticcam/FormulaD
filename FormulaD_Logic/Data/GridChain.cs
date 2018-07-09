@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace FormulaD_Logic.Data {
     public class GridChain {
@@ -9,18 +8,17 @@ namespace FormulaD_Logic.Data {
             Straight
         }
 
-        public int GridChainId { get; set; }
         public int StopNumberFrom { get; set; }
         public int StopNumberTo { get; set; }
         public enumDirectionType Direction { get; set; }
     }
 
     public class GridChainRef {
-        private Dictionary<int, IEnumerable<GridChain>> _chainBySpotNumberFrom;
+        private Dictionary<int, List<GridChain>> _chainBySpotNumberFrom = new Dictionary<int, List<GridChain>>();
+        private List<GridChain> _chain = new List<GridChain>();
 
-        public GridChainRef(IEnumerable<GridChain> gridChain) {
-            var distinct = gridChain.Select(x => x.StopNumberFrom).Distinct();
-            _chainBySpotNumberFrom = distinct.ToDictionary(x => x, x => gridChain.Where(y => y.StopNumberFrom == x));
+        public IEnumerable<GridChain> Enumerate {
+            get { return _chain; }
         }
 
         public IEnumerable<GridChain> GetChainBySpotNumberFrom(int spotNumberFrom) {
@@ -29,6 +27,14 @@ namespace FormulaD_Logic.Data {
 
         public bool ChainBySpotNumberFromContains(int spotNumberFrom) {
             return _chainBySpotNumberFrom.ContainsKey(spotNumberFrom);
+        }
+
+        public void AddGridChain(GridChain chain) {
+            if (!_chainBySpotNumberFrom.ContainsKey(chain.StopNumberFrom)) {
+                _chainBySpotNumberFrom.Add(chain.StopNumberFrom, new List<GridChain>());
+            }
+            _chainBySpotNumberFrom[chain.StopNumberFrom].Add(chain);
+            _chain.Add(chain);
         }
     }
 }

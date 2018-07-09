@@ -1,3 +1,0 @@
-1,Inward
-2,Outward
-3,Straight
