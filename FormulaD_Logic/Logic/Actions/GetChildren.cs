@@ -135,7 +135,13 @@ namespace FormulaD_Logic.Logic.Actions {
                 _seenBefore[roll.SpotStart].Add(roll.SpotEnd, new HashSet<int>());
             }
             _seenBefore[roll.SpotStart][roll.SpotEnd].Add(roll.MoveCount);
-            _rollRef.AddRoll(roll.SpotStart, roll.MoveCount, roll.SpotEnd, roll.OvershootTurnCount, roll.OvershootCount);
+            _rollRef.AddRoll(
+                startSpot: roll.SpotStart,
+                dieNum: roll.MoveCount,
+                endSpot: roll.SpotEnd,
+                overshootTurnCount: roll.OvershootTurnCount,
+                overshootCount: roll.OvershootCount,
+                direction: roll.Direction);
         }
 
         private class RollTemplate {
