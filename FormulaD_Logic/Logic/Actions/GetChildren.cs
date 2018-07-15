@@ -28,15 +28,13 @@ namespace FormulaD_Logic.Logic.Actions {
             foreach (var grid in _grid.Enumerate) {
                 if (_gridChain.ChainBySpotNumberFromContains(grid.SpotNumber)) {
                     foreach (var chain in _gridChain.GetChainBySpotNumberFrom(grid.SpotNumber)) {
-                        List<int> overshootCount = new List<int>();
-                        if (CheckForNewOvershootCount(chain)) {
-                            overshootCount.Add(1);
-                        }
+                        int overshootTurnCount = (CheckForNewOvershootCount(chain) ? 1 : 0);
                         AddRoll(new RollTemplate() {
                             Direction = chain.Direction,
                             DoesCrossFinish = _grid.GetBySpotNumber(chain.StopNumberTo).IsFinish && !_grid.GetBySpotNumber(chain.StopNumberFrom).IsFinish,
                             MoveCount = 1,
-                            OvershootCount = overshootCount,
+                            OvershootCount = overshootTurnCount,
+                            OvershootTurnCount = overshootTurnCount,
                             SpotStart = grid.SpotNumber,
                             SpotEnd = chain.StopNumberTo
                         });
@@ -52,22 +50,20 @@ namespace FormulaD_Logic.Logic.Actions {
                         if (_gridChain.ChainBySpotNumberFromContains(roll.SpotEnd)) {
                             foreach (var chain in _gridChain.GetChainBySpotNumberFrom(roll.SpotEnd)) {
                                 if (CanMoveDirection(roll.Direction, chain.Direction)) {
-                                    List<int> overshootCount = new List<int>(roll.OvershootCount);
-                                    if (CheckForNewOvershootCount(chain)) {
-                                        overshootCount.Add(0);
-                                    }
-                                    IncrementOvershoot(overshootCount);
+                                    int overshootTurnCount = roll.OvershootTurnCount + (CheckForNewOvershootCount(chain) ? 1 : 0);
+                                    int overshootCount = roll.OvershootCount + overshootTurnCount;
                                     if (!SeenBefore(roll.SpotStart, chain.StopNumberTo, moveCount) && CanMoveDirection(roll.Direction, chain.Direction)) {
                                         AddRoll(new RollTemplate() {
                                             Direction = CombineDirections(roll.Direction, chain.Direction),
                                             DoesCrossFinish = roll.DoesCrossFinish,
                                             OvershootCount = overshootCount,
+                                            OvershootTurnCount = overshootTurnCount,
                                             MoveCount = moveCount,
                                             SpotEnd = chain.StopNumberTo,
                                             SpotStart = roll.SpotStart
                                         });
                                     } else {
-                                        CompareOvershoot(roll.SpotStart, chain.StopNumberTo, moveCount, overshootCount);
+                                        CompareOvershoot(roll.SpotStart, chain.StopNumberTo, moveCount, overshootTurnCount, overshootCount);
                                     }
                                 }
                             }
@@ -77,21 +73,17 @@ namespace FormulaD_Logic.Logic.Actions {
             }
         }
 
-        private void CompareOvershoot(int spotStart, int spotEnd, int moveCount, List<int> newOvershoot) {
+        private void CompareOvershoot(int spotStart, int spotEnd, int moveCount, int overshootTurnCount, int overshootCount) {
             var oldOvershoot = _rollRef.RollsBySpotByDie(spotStart, moveCount).Where(x => x.EndSpot == spotEnd).First();
             bool replace = false;
-            if (newOvershoot.Count > oldOvershoot.OvershootCount.Count) {
+            if (overshootTurnCount < oldOvershoot.OvershootTurnCount) {
                 replace = true;
-            } else {
-                for (int index = 0; index < newOvershoot.Count; index++) {
-                    if (newOvershoot[index] < oldOvershoot.OvershootCount[index]) {
-                        replace = true;
-                        break;
-                    }
-                }
+            } else if (overshootCount < oldOvershoot.OvershootCount) {
+                replace = true;
             }
             if (replace) {
-                oldOvershoot.OvershootCount = newOvershoot;
+                oldOvershoot.OvershootCount = overshootCount;
+                oldOvershoot.OvershootTurnCount = overshootTurnCount;
             }
         }
 
@@ -143,7 +135,7 @@ namespace FormulaD_Logic.Logic.Actions {
                 _seenBefore[roll.SpotStart].Add(roll.SpotEnd, new HashSet<int>());
             }
             _seenBefore[roll.SpotStart][roll.SpotEnd].Add(roll.MoveCount);
-            _rollRef.AddRoll(roll.SpotStart, roll.MoveCount, roll.SpotEnd, roll.OvershootCount);
+            _rollRef.AddRoll(roll.SpotStart, roll.MoveCount, roll.SpotEnd, roll.OvershootTurnCount, roll.OvershootCount);
         }
 
         private class RollTemplate {
@@ -152,7 +144,8 @@ namespace FormulaD_Logic.Logic.Actions {
             public int SpotEnd { get; set; }
             public int SpotStart { get; set; }
             public GridChain.enumDirectionType Direction { get; set; }
-            public List<int> OvershootCount { get; set; }
+            public int OvershootTurnCount { get; set; }
+            public int OvershootCount { get; set; }
         }
     }
 }

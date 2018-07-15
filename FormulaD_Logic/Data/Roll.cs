@@ -5,14 +5,15 @@ namespace FormulaD_Logic.Data {
         public int StartSpot { get; set; }
         public int EndSpot { get; set; }
         public bool DoesCrossFinish { get; set; }
-        public List<int> OvershootCount { get; set; }
+        public int OvershootTurnCount { get; set; }
+        public int OvershootCount { get; set; }
     }
 
     public class RollRef {
         private Dictionary<int, Dictionary<int, List<Roll>>> _rollBySpotByDie = new Dictionary<int, Dictionary<int, List<Roll>>>();
         private List<Roll> _rolls = new List<Roll>();
 
-        public void AddRoll(int startSpot, int dieNum, int endSpot, List<int> overshootCount) {
+        public void AddRoll(int startSpot, int dieNum, int endSpot, int overshootTurnCount, int overshootCount) {
             if (!_rollBySpotByDie.ContainsKey(startSpot)) {
                 _rollBySpotByDie.Add(startSpot, new Dictionary<int, List<Roll>>());
             }
@@ -22,7 +23,8 @@ namespace FormulaD_Logic.Data {
             Roll roll = new Roll() {
                 StartSpot = startSpot,
                 EndSpot = endSpot,
-                OvershootCount = overshootCount
+                OvershootCount = overshootCount,
+                OvershootTurnCount = overshootTurnCount
             };
             _rollBySpotByDie[startSpot][dieNum].Add(roll);
             _rolls.Add(roll);
