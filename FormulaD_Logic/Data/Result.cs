@@ -5,6 +5,13 @@ namespace FormulaD_Logic.Data {
         public Spot CurrentSpot { get; set; }
         public double ExpectedTurnsToWin { get; set; }
         public double ExpectedTireReduction { get; set; }
+        public enumGearChange SuggestedGearChange { get; set; }
+
+        public enum enumGearChange {
+            ShiftUp,
+            ShiftDown,
+            Stay
+        }
     }
 
     public class ResultRef {

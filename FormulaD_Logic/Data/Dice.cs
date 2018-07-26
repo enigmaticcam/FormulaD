@@ -9,6 +9,7 @@ namespace FormulaD_Logic.Data {
 
     public class DiceRef {
         private Dictionary<int, Die> _diceByNum = new Dictionary<int, Die>();
+        private List<Die> _dice = new List<Die>();
 
         private Die _highestDie;
         public Die HighestDie {
@@ -18,6 +19,10 @@ namespace FormulaD_Logic.Data {
         private Die _lowestDie;
         public Die LowestDie {
             get { return _lowestDie; }
+        }
+
+        public IEnumerable<Die> Enumerate {
+            get { return _dice; }
         }
 
         public Die GetByNum(int num) {
@@ -36,6 +41,7 @@ namespace FormulaD_Logic.Data {
             } else if (die.DieNum < _lowestDie.DieNum) {
                 _lowestDie = die;
             }
+            _dice.Add(die);
         }
     }
 }
