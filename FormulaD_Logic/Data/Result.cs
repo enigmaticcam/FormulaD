@@ -15,23 +15,28 @@ namespace FormulaD_Logic.Data {
     }
 
     public class ResultRef {
-        private List<Result> _results = new List<Result>();
-        private Dictionary<int, List<Result>> _resultsBySpotNumber = new Dictionary<int, List<Result>>();
-        
-        public void AddResult(Result result) {
-            _results.Add(result);
-            if (!_resultsBySpotNumber.ContainsKey(result.CurrentSpot.SpotNumber)) {
-                _resultsBySpotNumber.Add(result.CurrentSpot.SpotNumber, new List<Result>());
+        private Result[][][][][][][] _results;
+
+        public void Initialize(int maxLaps, int maxSpots, int maxWpTire, int maxWpBreaks, int maxWpGear, int maxWpEngines, int maxGear) {
+            _results = new Result[maxLaps][][][][][][];
+            for (int lap = 0; lap < maxLaps; lap++) {
+                _results[lap] = new Result[maxSpots][][][][][];
+                for (int spot = 0; spot < maxSpots; spot++) {
+                    _results[lap][spot] = new Result[maxWpTire][][][][];
+                    for (int wpTire = 0; wpTire < maxWpTire; wpTire++) {
+                        _results[lap][spot][wpTire] = new Result[maxWpBreaks][][][];
+                        for (int wpBreak = 0; wpBreak < maxWpBreaks; wpBreak++) {
+                            _results[lap][spot][wpTire][wpBreak] = new Result[maxWpGear][][];
+                            for (int wpGear = 0; wpGear < maxWpGear; wpGear++) {
+                                _results[lap][spot][wpTire][wpBreak][wpGear] = new Result[maxWpEngines][];
+                                for (int wpEngine = 0; wpEngine < maxWpEngines; wpEngine++) {
+                                    _results[lap][spot][wpTire][wpBreak][wpGear][wpEngine] = new Result[maxGear];
+                                }
+                            }
+                        }
+                    }
+                }
             }
-            _resultsBySpotNumber[result.CurrentSpot.SpotNumber].Add(result);
-        }
-
-        public IEnumerable<Result> Enumerate {
-            get { return _results; }
-        }
-
-        public bool ContainsResultBySpotNumber(int spotNumber) {
-            return _resultsBySpotNumber.ContainsKey(spotNumber);
         }
     }
 }

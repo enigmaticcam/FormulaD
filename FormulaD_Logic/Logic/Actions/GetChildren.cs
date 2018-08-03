@@ -28,7 +28,7 @@ namespace FormulaD_Logic.Logic.Actions {
             foreach (var grid in _grid.Enumerate) {
                 if (_gridChain.ChainBySpotNumberFromContains(grid.SpotNumber)) {
                     foreach (var chain in _gridChain.GetChainBySpotNumberFrom(grid.SpotNumber)) {
-                        int overshootTurnCount = (CheckForNewOvershootCount(chain) ? 1 : 0);
+                        uint overshootTurnCount = (CheckForNewOvershootCount(chain) ? (uint)1 : 0);
                         AddRoll(new RollTemplate() {
                             Direction = chain.Direction,
                             DoesCrossFinish = _grid.GetBySpotNumber(chain.StopNumberTo).IsFinish && !_grid.GetBySpotNumber(chain.StopNumberFrom).IsFinish,
@@ -50,8 +50,8 @@ namespace FormulaD_Logic.Logic.Actions {
                         if (_gridChain.ChainBySpotNumberFromContains(roll.SpotEnd)) {
                             foreach (var chain in _gridChain.GetChainBySpotNumberFrom(roll.SpotEnd)) {
                                 if (CanMoveDirection(roll.Direction, chain.Direction)) {
-                                    int overshootTurnCount = roll.OvershootTurnCount + (CheckForNewOvershootCount(chain) ? 1 : 0);
-                                    int overshootCount = roll.OvershootCount + overshootTurnCount;
+                                    uint overshootTurnCount = roll.OvershootTurnCount + (CheckForNewOvershootCount(chain) ? (uint)1 : 0);
+                                    uint overshootCount = roll.OvershootCount + overshootTurnCount;
                                     if (!SeenBefore(roll.SpotStart, chain.StopNumberTo, moveCount) && CanMoveDirection(roll.Direction, chain.Direction)) {
                                         AddRoll(new RollTemplate() {
                                             Direction = CombineDirections(roll.Direction, chain.Direction),
@@ -73,7 +73,7 @@ namespace FormulaD_Logic.Logic.Actions {
             }
         }
 
-        private void CompareOvershoot(int spotStart, int spotEnd, int moveCount, int overshootTurnCount, int overshootCount) {
+        private void CompareOvershoot(int spotStart, int spotEnd, int moveCount, uint overshootTurnCount, uint overshootCount) {
             var oldOvershoot = _rollRef.RollsBySpotByDie(spotStart, moveCount).Where(x => x.EndSpot == spotEnd).First();
             bool replace = false;
             if (overshootTurnCount < oldOvershoot.OvershootTurnCount) {
@@ -150,8 +150,8 @@ namespace FormulaD_Logic.Logic.Actions {
             public int SpotEnd { get; set; }
             public int SpotStart { get; set; }
             public GridChain.enumDirectionType Direction { get; set; }
-            public int OvershootTurnCount { get; set; }
-            public int OvershootCount { get; set; }
+            public uint OvershootTurnCount { get; set; }
+            public uint OvershootCount { get; set; }
         }
     }
 }

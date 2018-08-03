@@ -1,6 +1,12 @@
-﻿
+﻿using System.Linq;
+
 namespace FormulaD_Logic.Data {
     public abstract class Track {
+        public abstract int MaxLaps { get; }
+
+        public int MaxSpots {
+            get { return Grid.GridFinish.Max(x => x.SpotNumber); }
+        }
 
         private GridChainRef _chain = new GridChainRef();
         public GridChainRef Chain {

@@ -25,6 +25,7 @@ namespace FormulaD_Logic.Logic {
 
         public Result Perform(int laps) {
             CalculateAllMoves();
+            Initialize();
             _start.SpotNumber = 17;
             FindAllStartingPossibilities();
             return null;
@@ -33,6 +34,10 @@ namespace FormulaD_Logic.Logic {
         private void CalculateAllMoves() {
             ActionGetChildren action = new ActionGetChildren(_track.Chain, _track.Dice, _track.Grid);
             _rolls = action.Perform();
+        }
+
+        private void Initialize() {
+            _results.Initialize(_track.MaxLaps, _track.MaxSpots, 15, 8, 8, 8, 6);
         }
 
         private void FindAllStartingPossibilities() {
@@ -62,16 +67,13 @@ namespace FormulaD_Logic.Logic {
             if (_start.Die.DieNum > 1) {
                 CalcExpectedValues(enumShiftDirection.Down);
             }
-            if (_start.Die.DieNum > 2) {
-                CalcExpectedValues(enumShiftDirection.Down);
-            }
-            if (_start.Die.DieNum > 3 && _start.WpGear >= 1) {
+            if (_start.Die.DieNum > 2 && _start.WpGear >= 1) {
                 CalcExpectedValues(enumShiftDirection.Down2);
             }
-            if (_start.Die.DieNum > 4 && _start.WpGear >= 1 && _start.WpBreaks >= 1) {
+            if (_start.Die.DieNum > 3 && _start.WpGear >= 1 && _start.WpBreaks >= 1) {
                 CalcExpectedValues(enumShiftDirection.Down3);
             }
-            if (_start.Die.DieNum > 5 && _start.WpGear >= 1 && _start.WpBreaks >= 1 && _start.WpEngine >= 1) {
+            if (_start.Die.DieNum > 4 && _start.WpGear >= 1 && _start.WpBreaks >= 1 && _start.WpEngine >= 1) {
                 CalcExpectedValues(enumShiftDirection.Down4);
             }
         }
@@ -95,6 +97,7 @@ namespace FormulaD_Logic.Logic {
                 CalcTireReduction();
                 if (_score < _bestScore) {
 
+
                 }
             }
         }
@@ -108,6 +111,10 @@ namespace FormulaD_Logic.Logic {
                 }
                 _score += _cost.WpTire;
             }
+        }
+
+        private void CalcExpectedTurns() {
+
         }
 
         private class StartProperties {

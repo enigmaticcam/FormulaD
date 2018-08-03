@@ -6,7 +6,7 @@ namespace FormulaD_Logic.Data {
         public GridChain.enumDirectionType Direction { get; set; }
         public int EndSpot { get; set; }
         public uint OvershootCount { get; set; }
-        public int OvershootTurnCount { get; set; }
+        public uint OvershootTurnCount { get; set; }
         public int StartSpot { get; set; }
     }
 
@@ -14,7 +14,7 @@ namespace FormulaD_Logic.Data {
         private Dictionary<int, Dictionary<int, List<Roll>>> _rollBySpotByDie = new Dictionary<int, Dictionary<int, List<Roll>>>();
         private List<Roll> _rolls = new List<Roll>();
 
-        public void AddRoll(int startSpot, int dieNum, int endSpot, int overshootTurnCount, uint overshootCount, GridChain.enumDirectionType direction) {
+        public void AddRoll(int startSpot, int dieNum, int endSpot, uint overshootTurnCount, uint overshootCount, GridChain.enumDirectionType direction) {
             if (!_rollBySpotByDie.ContainsKey(startSpot)) {
                 _rollBySpotByDie.Add(startSpot, new Dictionary<int, List<Roll>>());
             }

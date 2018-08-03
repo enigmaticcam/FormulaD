@@ -1,6 +1,10 @@
 ﻿
 namespace FormulaD_Logic.Data.Tracks {
     public class Monaco : Track {
+        public override int MaxLaps {
+            get { return 2; }
+        }
+
         public Monaco() {
             AddGridChain();
             AddGrid();
@@ -109,20 +113,20 @@ namespace FormulaD_Logic.Data.Tracks {
             GenerateGrid(331, 334, true, 1);
             GenerateGrid(496, 497, true, 1);
 
-            // Start
-            Grid.GetBySpotNumber(4).IsStart = true;
-            Grid.GetBySpotNumber(7).IsStart = true;
-            Grid.GetBySpotNumber(10).IsStart = true;
-            Grid.GetBySpotNumber(13).IsStart = true;
-            Grid.GetBySpotNumber(16).IsStart = true;
-            Grid.GetBySpotNumber(338).IsStart = true;
-            Grid.GetBySpotNumber(341).IsStart = true;
-            Grid.GetBySpotNumber(344).IsStart = true;
-            Grid.GetBySpotNumber(347).IsStart = true;
-            Grid.GetBySpotNumber(350).IsStart = true;
-            Grid.GetBySpotNumber(17).IsFinish = true;
-            Grid.GetBySpotNumber(186).IsFinish = true;
-            Grid.GetBySpotNumber(352).IsFinish = true;
+            // Start/Finish
+            Grid.SetIsStart(4, true);
+            Grid.SetIsStart(7, true);
+            Grid.SetIsStart(10, true);
+            Grid.SetIsStart(13, true);
+            Grid.SetIsStart(16, true);
+            Grid.SetIsStart(338, true);
+            Grid.SetIsStart(341, true);
+            Grid.SetIsStart(344, true);
+            Grid.SetIsStart(347, true);
+            Grid.SetIsStart(350, true);
+            Grid.SetIsFinish(17, true);
+            Grid.SetIsFinish(186, true);
+            Grid.SetIsFinish(352, true);
         }
 
         private void AddGridChain() {

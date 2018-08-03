@@ -26,6 +26,18 @@ namespace FormulaD_Logic.Data {
             }
         }
 
+        public void SetIsStart(int spotNumber, bool isStart) {
+            var grid = _gridBySpotNumber[spotNumber];
+            grid.IsStart = isStart;
+            _gridStart.Add(grid);
+        }
+
+        public void SetIsFinish(int spotNumber, bool isFinish) {
+            var grid = _gridBySpotNumber[spotNumber];
+            grid.IsFinish = isFinish;
+            _gridFinish.Add(grid);
+        }
+
         public IEnumerable<Grid> GridStart {
             get { return _gridStart; }
         }
