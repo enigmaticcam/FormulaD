@@ -8,6 +8,10 @@ namespace FormulaD_Logic.Data {
             get { return Grid.GridFinish.Max(x => x.SpotNumber); }
         }
 
+        public int MaxTurnCount {
+            get { return Grid.MaxTurnCount; }
+        }
+
         private GridChainRef _chain = new GridChainRef();
         public GridChainRef Chain {
             get { return _chain; }

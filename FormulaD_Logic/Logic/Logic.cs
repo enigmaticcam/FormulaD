@@ -11,8 +11,8 @@ namespace FormulaD_Logic.Logic {
         private StartProperties _start = new StartProperties();
         private CostProperties _cost = new CostProperties();
         private EndProperties _end = new EndProperties();
-        private uint _bestScore;
-        private uint _score;
+        private Score _bestScore = new Score();
+        private Score _currentScore = new Score();
 
         public enum enumShiftDirection {
             Down4 = -4,
@@ -23,10 +23,11 @@ namespace FormulaD_Logic.Logic {
             Up = 1
         }
 
-        public Result Perform(int laps) {
+        public Result Perform() {
             CalculateAllMoves();
             Initialize();
-            _start.SpotNumber = 17;
+            _start.SpotNumber = 185;
+            _start.Lap = 2;
             FindAllStartingPossibilities();
             return null;
         }
@@ -37,7 +38,7 @@ namespace FormulaD_Logic.Logic {
         }
 
         private void Initialize() {
-            _results.Initialize(_track.MaxLaps, _track.MaxSpots, 15, 8, 8, 8, 6);
+            _results.Initialize(_track.MaxLaps, _track.MaxSpots, _track.MaxTurnCount, 15, 8, 8, 8, 6);
         }
 
         private void FindAllStartingPossibilities() {
@@ -86,18 +87,20 @@ namespace FormulaD_Logic.Logic {
         }
 
         private void PickBestMove(enumShiftDirection shift) {
-            _bestScore = uint.MaxValue;
+            _bestScore.AnyCost = uint.MaxValue;
+            _bestScore.BringsCostBelowZero = 1;
+            _bestScore.ExpectedTurnsToWin = double.MaxValue;
             foreach (var roll in _rolls.RollsBySpotByDie(_start.SpotNumber, _start.MoveCount)) {
-                _start.Roll = roll; // may not need this, if we don't call any other functions
-
-                // Order rolls so as to pick the best one.
-                // All actions that bring a cost below zero come last.
-                _cost.AddedBelowZeroCostAlready = false;
-                _score = 0;
+                _start.Roll = roll;
+                _currentScore.AnyCost = 0;
                 CalcTireReduction();
-                if (_score < _bestScore) {
-
-
+                if (_currentScore.BringsCostBelowZero <= _bestScore.BringsCostBelowZero) {
+                    CalcExpectedTurns();
+                    if (_currentScore.ExpectedTurnsToWin <= _bestScore.ExpectedTurnsToWin) {
+                        if (_currentScore.AnyCost < _bestScore.AnyCost) {
+                            SetBestScore();
+                        }
+                    }
                 }
             }
         }
@@ -106,15 +109,28 @@ namespace FormulaD_Logic.Logic {
             if (_start.Spot.IsTurn && _start.TurnCount < _start.Spot.TurnCount && _start.Roll.OvershootTurnCount > 0) {
                 _cost.WpTire = _start.Roll.OvershootCount;
                 if (_cost.WpTire > _start.WpTire && !_cost.AddedBelowZeroCostAlready) {
-                    _score += 2147483648; //2^32
-                    _cost.AddedBelowZeroCostAlready = true;
+                    _currentScore.BringsCostBelowZero = 1;
+                } else {
+                    _currentScore.BringsCostBelowZero = 0;
                 }
-                _score += _cost.WpTire;
+                _currentScore.AnyCost += _cost.WpTire;
             }
         }
 
         private void CalcExpectedTurns() {
+            if (_start.Lap == _track.MaxLaps && _start.Roll.DoesCrossFinish) {
+                _currentScore.ExpectedTurnsToWin = 1;
+            } else {
+                var result = _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
+                _currentScore.ExpectedTurnsToWin = 1 + result.ExpectedTurnsToWin;
+            }
+        }
 
+        private void SetBestScore() {
+            _bestScore.AnyCost = _currentScore.AnyCost;
+            _bestScore.BringsCostBelowZero = _currentScore.BringsCostBelowZero;
+            _bestScore.ExpectedTurnsToWin = _currentScore.ExpectedTurnsToWin;
+            _bestScore.CurrentRoll = _start.Roll;
         }
 
         private class StartProperties {
@@ -122,7 +138,7 @@ namespace FormulaD_Logic.Logic {
             public int MoveCount { get; set; }
             public int SpotNumber { get; set; }
             public int TurnCount { get; set; }
-            public uint WpTire { get; set; }
+            public int WpTire { get; set; }
             public int WpBreaks { get; set; }
             public int WpGear { get; set; }
             public int WpEngine { get; set; }
@@ -138,6 +154,13 @@ namespace FormulaD_Logic.Logic {
 
         private class EndProperties {
             public uint WpTire { get; set; }
+        }
+
+        private class Score {
+            public int BringsCostBelowZero { get; set; }
+            public double ExpectedTurnsToWin { get; set; }
+            public uint AnyCost { get; set; }
+            public Roll CurrentRoll { get; set; }
         }
     }
 }

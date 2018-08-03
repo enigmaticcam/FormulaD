@@ -141,7 +141,8 @@ namespace FormulaD_Logic.Logic.Actions {
                 endSpot: roll.SpotEnd,
                 overshootTurnCount: roll.OvershootTurnCount,
                 overshootCount: roll.OvershootCount,
-                direction: roll.Direction);
+                direction: roll.Direction,
+                doesCrossFinish: roll.DoesCrossFinish);
         }
 
         private class RollTemplate {

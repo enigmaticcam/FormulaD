@@ -10,7 +10,7 @@ namespace FormulaD_Win {
 
         private void button1_Click(object sender, EventArgs e) {
             BuildResults results = new BuildResults();
-            results.Perform(2);
+            results.Perform();
         }
     }
 }

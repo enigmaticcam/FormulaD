@@ -14,7 +14,7 @@ namespace FormulaD_Logic.Data {
         private Dictionary<int, Dictionary<int, List<Roll>>> _rollBySpotByDie = new Dictionary<int, Dictionary<int, List<Roll>>>();
         private List<Roll> _rolls = new List<Roll>();
 
-        public void AddRoll(int startSpot, int dieNum, int endSpot, uint overshootTurnCount, uint overshootCount, GridChain.enumDirectionType direction) {
+        public void AddRoll(int startSpot, int dieNum, int endSpot, uint overshootTurnCount, uint overshootCount, GridChain.enumDirectionType direction, bool doesCrossFinish) {
             if (!_rollBySpotByDie.ContainsKey(startSpot)) {
                 _rollBySpotByDie.Add(startSpot, new Dictionary<int, List<Roll>>());
             }
@@ -23,6 +23,7 @@ namespace FormulaD_Logic.Data {
             }
             Roll roll = new Roll() {
                 Direction = direction,
+                DoesCrossFinish = doesCrossFinish,
                 EndSpot = endSpot,
                 OvershootCount = overshootCount,
                 OvershootTurnCount = overshootTurnCount,

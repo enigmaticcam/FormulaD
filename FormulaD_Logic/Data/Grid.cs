@@ -24,6 +24,9 @@ namespace FormulaD_Logic.Data {
             if (grid.IsFinish) {
                 _gridFinish.Add(grid);
             }
+            if (grid.TurnCount > _maxTurnCount) {
+                _maxTurnCount = grid.TurnCount;
+            }
         }
 
         public void SetIsStart(int spotNumber, bool isStart) {
@@ -36,6 +39,11 @@ namespace FormulaD_Logic.Data {
             var grid = _gridBySpotNumber[spotNumber];
             grid.IsFinish = isFinish;
             _gridFinish.Add(grid);
+        }
+
+        private int _maxTurnCount = 0;
+        public int MaxTurnCount {
+            get { return _maxTurnCount; }
         }
 
         public IEnumerable<Grid> GridStart {
