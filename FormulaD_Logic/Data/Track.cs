@@ -5,7 +5,7 @@ namespace FormulaD_Logic.Data {
         public abstract int MaxLaps { get; }
 
         public int MaxSpots {
-            get { return Grid.GridFinish.Max(x => x.SpotNumber); }
+            get { return Grid.Enumerate.Max(x => x.SpotNumber); }
         }
 
         public int MaxTurnCount {

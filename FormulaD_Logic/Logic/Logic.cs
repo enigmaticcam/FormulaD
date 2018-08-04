@@ -6,6 +6,7 @@ namespace FormulaD_Logic.Logic {
         private ResultRef _results;
         private RollRef _rolls;
         private StartProperties _start = new StartProperties();
+        private CostProperties _cost = new CostProperties();
         private Score _bestScore = new Score();
         private Score _currentScore = new Score();
         private AllScores _currentAllScores = new AllScores();
@@ -48,6 +49,7 @@ namespace FormulaD_Logic.Logic {
 
         private void ChooseBestShiftAction() {
             _bestAllScores.SetToMaxValues();
+            _cost.Reset();
             CalcExpectedValues(Result.enumShiftDirection.Stay);
             if (_start.Die.DieNum < _track.Dice.HighestDie.DieNum) {
                 CalcExpectedValues(Result.enumShiftDirection.Up);
@@ -56,12 +58,18 @@ namespace FormulaD_Logic.Logic {
                 CalcExpectedValues(Result.enumShiftDirection.Down);
             }
             if (_start.Die.DieNum > 2 && _start.WpGear >= 1) {
+                _cost.WpGear = 1;
                 CalcExpectedValues(Result.enumShiftDirection.Down2);
             }
             if (_start.Die.DieNum > 3 && _start.WpGear >= 1 && _start.WpBreaks >= 1) {
+                _cost.WpGear = 1;
+                _cost.WpBreaks = 1;
                 CalcExpectedValues(Result.enumShiftDirection.Down3);
             }
             if (_start.Die.DieNum > 4 && _start.WpGear >= 1 && _start.WpBreaks >= 1 && _start.WpEngine >= 1) {
+                _cost.WpGear = 1;
+                _cost.WpBreaks = 1;
+                _cost.WpEngine = 1;
                 CalcExpectedValues(Result.enumShiftDirection.Down4);
             }
             SaveBestAllScores();
@@ -79,20 +87,8 @@ namespace FormulaD_Logic.Logic {
             SetBestAllScores(shift);
         }
 
-        private void SetBestAllScores(Result.enumShiftDirection shift) {
-            if (_currentAllScores.ExpectedTurnsToWin < _bestAllScores.ExpectedTurnsToWin) {
-                _bestAllScores.CopyFrom(_currentAllScores);
-                _bestAllScores.Shift = shift;
-            }
-        }
-
-        private void SaveBestAllScores() {
-            var result = _bestAllScores.ToResult();
-            _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum] = result;
-        }
-
         private void PickBestMove() {
-            _bestScore.AnyCost = uint.MaxValue;
+            _bestScore.AnyCost = int.MaxValue;
             _bestScore.BringsCostBelowZero = 1;
             _bestScore.ExpectedTurnsToWin = double.MaxValue;
             _bestScore.WpTire = 0;
@@ -113,7 +109,7 @@ namespace FormulaD_Logic.Logic {
 
         private void CalcTireReduction() {
             if (_start.Spot.IsTurn && _start.TurnCount < _start.Spot.TurnCount && _start.Roll.OvershootTurnCount > 0) {
-                uint wpTire = _start.Roll.OvershootCount;
+                int wpTire = (int)_start.Roll.OvershootCount;
                 if (wpTire > _start.WpTire) {
                     _currentScore.BringsCostBelowZero = 1;
                 } else {
@@ -125,17 +121,43 @@ namespace FormulaD_Logic.Logic {
         }
 
         private void CalcExpectedTurns() {
-            if (_start.Lap == _track.MaxLaps && _start.Roll.DoesCrossFinish) {
+            if (_currentScore.BringsCostBelowZero == 1) {
+                _currentScore.ExpectedTurnsToWin = int.MaxValue;
+            } else if (_start.Lap == _track.MaxLaps && _start.Roll.DoesCrossFinish) {
                 _currentScore.ExpectedTurnsToWin = 1;
             } else {
-                var result = _results[_start.Lap, _start.Roll.EndSpot, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
+                var result = GetResultAfterCost();
                 if (result == null) {
                     BuildResults buildResults = new BuildResults(_rolls, _results, _track);
                     buildResults.Perform(_start.Roll.EndSpot);
-                    result = _results[_start.Lap, _start.Roll.EndSpot, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
+                    result = GetResultAfterCost();
                 }
                 _currentScore.ExpectedTurnsToWin = 1 + result.ExpectedTurnsToWin;
             }
+        }
+
+        private void SetBestAllScores(Result.enumShiftDirection shift) {
+            if (_currentAllScores.ExpectedTurnsToWin < _bestAllScores.ExpectedTurnsToWin) {
+                _bestAllScores.CopyFrom(_currentAllScores);
+                _bestAllScores.Shift = shift;
+            }
+        }
+
+        private void SaveBestAllScores() {
+            var result = _bestAllScores.ToResult();
+            _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum] = result;
+        }
+
+        private Result GetResultAfterCost() {
+            return _results[
+                _start.Lap,
+                _start.Roll.EndSpot,
+                _start.TurnCount,
+                _start.WpTire - _currentScore.WpTire,
+                _start.WpBreaks - _cost.WpBreaks,
+                _start.WpGear - _cost.WpGear,
+                _start.WpEngine - _cost.WpEngine,
+                _start.Die.DieNum];
         }
 
         private void SetBestScore() {
@@ -210,12 +232,24 @@ namespace FormulaD_Logic.Logic {
             public Roll Roll { get; set; }
         }
 
+        public class CostProperties {
+            public int WpBreaks { get; set; }
+            public int WpGear { get; set; }
+            public int WpEngine { get; set; }
+
+            public void Reset() {
+                WpBreaks = 0;
+                WpEngine = 0;
+                WpGear = 0;
+            }
+        }
+
         private class Score {
             public int BringsCostBelowZero { get; set; }
             public double ExpectedTurnsToWin { get; set; }
-            public uint AnyCost { get; set; }
+            public int AnyCost { get; set; }
             public Roll CurrentRoll { get; set; }
-            public uint WpTire { get; set; }
+            public int WpTire { get; set; }
         }
     }
 }
