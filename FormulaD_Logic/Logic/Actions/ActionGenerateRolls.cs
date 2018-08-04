@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace FormulaD_Logic.Logic.Actions {
-    public class ActionGetChildren {
+    public class ActionGenerateRolls {
         private GridChainRef _gridChain;
         private DiceRef _dice;
         private GridRef _grid;
@@ -12,7 +12,7 @@ namespace FormulaD_Logic.Logic.Actions {
         private Dictionary<int, List<RollTemplate>> _rolls = new Dictionary<int, List<RollTemplate>>();
         private Dictionary<int, Dictionary<int, HashSet<int>>> _seenBefore = new Dictionary<int, Dictionary<int, HashSet<int>>>();
 
-        public ActionGetChildren(GridChainRef gridChain, DiceRef dice, GridRef grid) {
+        public ActionGenerateRolls(GridChainRef gridChain, DiceRef dice, GridRef grid) {
             _gridChain = gridChain;
             _dice = dice;
             _grid = grid;

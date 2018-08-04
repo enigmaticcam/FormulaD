@@ -4,8 +4,8 @@ using FormulaD_Logic.Logic.Actions;
 
 namespace FormulaD_Logic.Logic {
     public class BuildResults {
-        private Track _track = new Monaco();
-        private ResultRef _results = new ResultRef();
+        private Track _track;
+        private ResultRef _results;
         private RollRef _rolls;
         private StartProperties _start = new StartProperties();
         private Score _bestScore = new Score();
@@ -21,18 +21,18 @@ namespace FormulaD_Logic.Logic {
             Up = 1
         }
 
-        public Result Perform() {
-            CalculateAllMoves();
+        public BuildResults(RollRef rolls, ResultRef results, Track track) {
+            _rolls = rolls;
+            _results = results;
+            _track = track;
+        }
+
+        public Result Perform(int spotNumber, int lap) {
             Initialize();
             _start.SpotNumber = 185;
             _start.Lap = 2;
             FindAllStartingPossibilities();
             return null;
-        }
-
-        private void CalculateAllMoves() {
-            ActionGetChildren action = new ActionGetChildren(_track.Chain, _track.Dice, _track.Grid);
-            _rolls = action.Perform();
         }
 
         private void Initialize() {
@@ -126,6 +126,11 @@ namespace FormulaD_Logic.Logic {
                 _currentScore.ExpectedTurnsToWin = 1;
             } else {
                 var result = _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
+                if (result == null) {
+                    BuildResults buildResults = new BuildResults(_rolls, _results, _track);
+                    result = buildResults.Perform(_start.SpotNumber, _start.Lap);
+                    _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum] = result;
+                }
                 _currentScore.ExpectedTurnsToWin = 1 + result.ExpectedTurnsToWin;
             }
         }

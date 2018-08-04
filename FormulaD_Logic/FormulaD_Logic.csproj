@@ -48,7 +48,7 @@
     <Compile Include="Data\Roll.cs" />
     <Compile Include="Data\Spot.cs" />
     <Compile Include="Data\Track.cs" />
-    <Compile Include="Logic\Actions\GetChildren.cs" />
+    <Compile Include="Logic\Actions\ActionGenerateRolls.cs" />
     <Compile Include="Logic\Logic.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

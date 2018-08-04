@@ -19,30 +19,11 @@ namespace FormulaD_Logic.Data {
 
         public void Initialize(int maxLaps, int maxSpots, int maxTurnCounts, int maxWpTire, int maxWpBreaks, int maxWpGear, int maxWpEngines, int maxGear) {
             _results = new Result[maxLaps, maxSpots, maxTurnCounts, maxWpTire, maxWpBreaks, maxWpGear, maxWpEngines, maxGear];
-            //_results = new Result[maxLaps][][][][][][];
-            //for (int lap = 0; lap < maxLaps; lap++) {
-            //    _results[lap] = new Result[maxSpots][][][][][];
-            //    for (int spot = 0; spot < maxSpots; spot++) {
-            //        _results[lap][spot] = new Result[maxWpTire][][][][];
-            //        for (int wpTire = 0; wpTire < maxWpTire; wpTire++) {
-            //            _results[lap][spot][wpTire] = new Result[maxWpBreaks][][][];
-            //            for (int wpBreak = 0; wpBreak < maxWpBreaks; wpBreak++) {
-            //                _results[lap][spot][wpTire][wpBreak] = new Result[maxWpGear][][];
-            //                for (int wpGear = 0; wpGear < maxWpGear; wpGear++) {
-            //                    _results[lap][spot][wpTire][wpBreak][wpGear] = new Result[maxWpEngines][];
-            //                    for (int wpEngine = 0; wpEngine < maxWpEngines; wpEngine++) {
-            //                        _results[lap][spot][wpTire][wpBreak][wpGear][wpEngine] = new Result[maxGear];
-            //                    }
-            //                }
-            //            }
-            //        }
-            //    }
-            //}
         }
 
         public Result this[int lap, int spot, int turnCount, int wpTire, int wpBreak, int wpGear, int wpEngine, int gear] {
-            //get { return _results[lap][spot][wpTire][wpBreak][wpGear][wpEngine][gear]; }
             get { return _results[lap - 1, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1]; }
+            set { _results[lap - 1, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1] = value; }
         }
     }
 }
