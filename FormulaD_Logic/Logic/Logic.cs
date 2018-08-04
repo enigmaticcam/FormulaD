@@ -1,6 +1,4 @@
 ﻿using FormulaD_Logic.Data;
-using FormulaD_Logic.Data.Tracks;
-using FormulaD_Logic.Logic.Actions;
 
 namespace FormulaD_Logic.Logic {
     public class BuildResults {
@@ -49,8 +47,7 @@ namespace FormulaD_Logic.Logic {
         }
 
         private void ChooseBestShiftAction() {
-            _bestAllScores.ExpectedTurnsToWin = double.MaxValue;
-            _bestAllScores.WpTire = double.MaxValue;
+            _bestAllScores.SetToMaxValues();
             CalcExpectedValues(Result.enumShiftDirection.Stay);
             if (_start.Die.DieNum < _track.Dice.HighestDie.DieNum) {
                 CalcExpectedValues(Result.enumShiftDirection.Up);
@@ -72,34 +69,25 @@ namespace FormulaD_Logic.Logic {
 
         private void CalcExpectedValues(Result.enumShiftDirection shift) {
             Die newDie = _track.Dice.GetByNum(_start.Die.DieNum + (int)shift);
-            _currentAllScores.ExpectedTurnsToWin = 0;
-            _currentAllScores.WpTire = 0;
+            _currentAllScores.Reset();
             for (_start.MoveCount = newDie.DieMin; _start.MoveCount <= newDie.DieMax; _start.MoveCount++) {
                 PickBestMove();
                 _currentAllScores.ExpectedTurnsToWin += _bestScore.ExpectedTurnsToWin;
                 _currentAllScores.WpTire += _bestScore.WpTire;
             }
-            int count = newDie.DieMax - newDie.DieMin + 1;
-            _currentAllScores.ExpectedTurnsToWin /= count;
-            _currentAllScores.WpTire /= count;
+            _currentAllScores.Average(newDie.DieMax - newDie.DieMin + 1);
             SetBestAllScores(shift);
         }
 
         private void SetBestAllScores(Result.enumShiftDirection shift) {
             if (_currentAllScores.ExpectedTurnsToWin < _bestAllScores.ExpectedTurnsToWin) {
-                _bestAllScores.ExpectedTurnsToWin = _currentAllScores.ExpectedTurnsToWin;
-                _bestAllScores.WpTire = _currentAllScores.WpTire;
+                _bestAllScores.CopyFrom(_currentAllScores);
                 _bestAllScores.Shift = shift;
             }
         }
 
         private void SaveBestAllScores() {
-            var result = new Result() {
-                CurrentSpot = null,
-                ExpectedTireReduction = _bestAllScores.WpTire,
-                ExpectedTurnsToWin = _bestAllScores.ExpectedTurnsToWin,
-                SuggestedGearChange = _bestAllScores.Shift
-            };
+            var result = _bestAllScores.ToResult();
             _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum] = result;
         }
 
@@ -161,7 +149,51 @@ namespace FormulaD_Logic.Logic {
         public class AllScores {
             public double ExpectedTurnsToWin { get; set; }
             public double WpTire { get; set; }
+            public double WpBreaks { get; set; }
+            public double WpGear { get; set; }
+            public double WpEngine { get; set; }
             public Result.enumShiftDirection Shift { get; set; }
+
+            public void Reset() {
+                ExpectedTurnsToWin = 0;
+                WpTire = 0;
+                WpBreaks = 0;
+                WpEngine = 0;
+                WpGear = 0;
+            }
+            
+            public void SetToMaxValues() {
+                ExpectedTurnsToWin = double.MaxValue;
+                WpTire = double.MaxValue;
+                WpBreaks = double.MaxValue;
+                WpEngine = double.MaxValue;
+                WpGear = double.MaxValue;
+            }
+
+            public void Average(int count) {
+                ExpectedTurnsToWin /= count;
+                WpTire /= count;
+                WpBreaks /= count;
+                WpEngine /= count;
+                WpGear /= count;
+            }
+            
+            public void CopyFrom(AllScores other) {
+                ExpectedTurnsToWin = other.ExpectedTurnsToWin;
+                WpTire = other.WpTire;
+                WpBreaks = other.WpBreaks;
+                WpEngine = other.WpEngine;
+                WpGear = other.WpGear;
+            }
+
+            public Result ToResult() {
+                return new Result() {
+                    CurrentSpot = null,
+                    ExpectedWpTire = WpTire,
+                    ExpectedTurnsToWin = 1 + ExpectedTurnsToWin,
+                    SuggestedGearChange = Shift
+                };
+            }
         }
 
         private class StartProperties {

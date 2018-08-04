@@ -4,7 +4,10 @@ namespace FormulaD_Logic.Data {
     public class Result {
         public Spot CurrentSpot { get; set; }
         public double ExpectedTurnsToWin { get; set; }
-        public double ExpectedTireReduction { get; set; }
+        public double ExpectedWpTire { get; set; }
+        public double ExpectedWpBrake { get; set; }
+        public double ExpectedWpEngine { get; set; }
+        public double ExpectedWpGear { get; set; }
         public enumShiftDirection SuggestedGearChange { get; set; }
 
         public enum enumShiftDirection {
