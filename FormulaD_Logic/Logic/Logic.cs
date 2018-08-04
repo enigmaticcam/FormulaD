@@ -10,16 +10,8 @@ namespace FormulaD_Logic.Logic {
         private StartProperties _start = new StartProperties();
         private Score _bestScore = new Score();
         private Score _currentScore = new Score();
-        private AllScores _allScores = new AllScores();
-
-        public enum enumShiftDirection {
-            Down4 = -4,
-            Down3 = -3,
-            Down2 = -2,
-            Down = -1,
-            Stay = 0,
-            Up = 1
-        }
+        private AllScores _currentAllScores = new AllScores();
+        private AllScores _bestAllScores = new AllScores();
 
         public BuildResults(RollRef rolls, ResultRef results, Track track) {
             _rolls = rolls;
@@ -27,68 +19,91 @@ namespace FormulaD_Logic.Logic {
             _track = track;
         }
 
-        public Result Perform(int spotNumber, int lap) {
-            Initialize();
-            _start.SpotNumber = 185;
-            _start.Lap = 2;
+        public void Perform(int spotNumber) {
+            _start.SpotNumber = spotNumber;
             FindAllStartingPossibilities();
-            return null;
-        }
-
-        private void Initialize() {
-            _results.Initialize(_track.MaxLaps, _track.MaxSpots, _track.MaxTurnCount, 15, 8, 8, 8, 6);
         }
 
         private void FindAllStartingPossibilities() {
             _start.Spot = _track.Grid.GetBySpotNumber(_start.SpotNumber);
-            for (_start.WpTire = 0; _start.WpTire <= 14; _start.WpTire++) {
-                for (_start.WpBreaks = 0; _start.WpBreaks <= 7; _start.WpBreaks++) {
-                    for (_start.WpGear = 0; _start.WpGear <= 7; _start.WpGear++) {
-                        for (_start.WpEngine = 0; _start.WpEngine <= 7; _start.WpEngine++) {
-                            for (_start.TurnCount = 0; _start.TurnCount <= _start.Spot.TurnCount; _start.TurnCount++) {
-                                foreach (var die in _track.Dice.Enumerate) {
-                                    _start.Die = die;
-                                    ChooseBestShiftAction();
+            for (_start.Lap = 0; _start.Lap <= _track.MaxLaps; _start.Lap++) {
+                if (_start.Lap == 2) { // --------------Testing----------------
+                    for (_start.WpTire = 0; _start.WpTire <= 14; _start.WpTire++) {
+                        for (_start.WpBreaks = 0; _start.WpBreaks <= 7; _start.WpBreaks++) {
+                            for (_start.WpGear = 0; _start.WpGear <= 7; _start.WpGear++) {
+                                for (_start.WpEngine = 0; _start.WpEngine <= 7; _start.WpEngine++) {
+                                    for (_start.TurnCount = 0; _start.TurnCount <= _start.Spot.TurnCount; _start.TurnCount++) {
+                                        foreach (var die in _track.Dice.Enumerate) {
+                                            _start.Die = die;
+                                            ChooseBestShiftAction();
+                                        }
+                                    }
+
                                 }
                             }
-                            
                         }
                     }
                 }
+                
             }
         }
 
         private void ChooseBestShiftAction() {
-            CalcExpectedValues(enumShiftDirection.Stay);
+            _bestAllScores.ExpectedTurnsToWin = double.MaxValue;
+            _bestAllScores.WpTire = double.MaxValue;
+            CalcExpectedValues(Result.enumShiftDirection.Stay);
             if (_start.Die.DieNum < _track.Dice.HighestDie.DieNum) {
-                CalcExpectedValues(enumShiftDirection.Up);
+                CalcExpectedValues(Result.enumShiftDirection.Up);
             }
             if (_start.Die.DieNum > 1) {
-                CalcExpectedValues(enumShiftDirection.Down);
+                CalcExpectedValues(Result.enumShiftDirection.Down);
             }
             if (_start.Die.DieNum > 2 && _start.WpGear >= 1) {
-                CalcExpectedValues(enumShiftDirection.Down2);
+                CalcExpectedValues(Result.enumShiftDirection.Down2);
             }
             if (_start.Die.DieNum > 3 && _start.WpGear >= 1 && _start.WpBreaks >= 1) {
-                CalcExpectedValues(enumShiftDirection.Down3);
+                CalcExpectedValues(Result.enumShiftDirection.Down3);
             }
             if (_start.Die.DieNum > 4 && _start.WpGear >= 1 && _start.WpBreaks >= 1 && _start.WpEngine >= 1) {
-                CalcExpectedValues(enumShiftDirection.Down4);
+                CalcExpectedValues(Result.enumShiftDirection.Down4);
             }
+            SaveBestAllScores();
         }
 
-        private void CalcExpectedValues(enumShiftDirection shift) {
+        private void CalcExpectedValues(Result.enumShiftDirection shift) {
             Die newDie = _track.Dice.GetByNum(_start.Die.DieNum + (int)shift);
-            _allScores.ExpectedTurnsToWin = 0;
-            _allScores.WpTire = 0;
+            _currentAllScores.ExpectedTurnsToWin = 0;
+            _currentAllScores.WpTire = 0;
             for (_start.MoveCount = newDie.DieMin; _start.MoveCount <= newDie.DieMax; _start.MoveCount++) {
-                PickBestMove(shift);
-                _allScores.ExpectedTurnsToWin += _bestScore.ExpectedTurnsToWin;
-                _allScores.WpTire += _bestScore.WpTire;
+                PickBestMove();
+                _currentAllScores.ExpectedTurnsToWin += _bestScore.ExpectedTurnsToWin;
+                _currentAllScores.WpTire += _bestScore.WpTire;
+            }
+            int count = newDie.DieMax - newDie.DieMin + 1;
+            _currentAllScores.ExpectedTurnsToWin /= count;
+            _currentAllScores.WpTire /= count;
+            SetBestAllScores(shift);
+        }
+
+        private void SetBestAllScores(Result.enumShiftDirection shift) {
+            if (_currentAllScores.ExpectedTurnsToWin < _bestAllScores.ExpectedTurnsToWin) {
+                _bestAllScores.ExpectedTurnsToWin = _currentAllScores.ExpectedTurnsToWin;
+                _bestAllScores.WpTire = _currentAllScores.WpTire;
+                _bestAllScores.Shift = shift;
             }
         }
 
-        private void PickBestMove(enumShiftDirection shift) {
+        private void SaveBestAllScores() {
+            var result = new Result() {
+                CurrentSpot = null,
+                ExpectedTireReduction = _bestAllScores.WpTire,
+                ExpectedTurnsToWin = _bestAllScores.ExpectedTurnsToWin,
+                SuggestedGearChange = _bestAllScores.Shift
+            };
+            _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum] = result;
+        }
+
+        private void PickBestMove() {
             _bestScore.AnyCost = uint.MaxValue;
             _bestScore.BringsCostBelowZero = 1;
             _bestScore.ExpectedTurnsToWin = double.MaxValue;
@@ -125,11 +140,11 @@ namespace FormulaD_Logic.Logic {
             if (_start.Lap == _track.MaxLaps && _start.Roll.DoesCrossFinish) {
                 _currentScore.ExpectedTurnsToWin = 1;
             } else {
-                var result = _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
+                var result = _results[_start.Lap, _start.Roll.EndSpot, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
                 if (result == null) {
                     BuildResults buildResults = new BuildResults(_rolls, _results, _track);
-                    result = buildResults.Perform(_start.SpotNumber, _start.Lap);
-                    _results[_start.Lap, _start.SpotNumber, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum] = result;
+                    buildResults.Perform(_start.Roll.EndSpot);
+                    result = _results[_start.Lap, _start.Roll.EndSpot, _start.TurnCount, _start.WpTire, _start.WpBreaks, _start.WpGear, _start.WpEngine, _start.Die.DieNum];
                 }
                 _currentScore.ExpectedTurnsToWin = 1 + result.ExpectedTurnsToWin;
             }
@@ -146,6 +161,7 @@ namespace FormulaD_Logic.Logic {
         public class AllScores {
             public double ExpectedTurnsToWin { get; set; }
             public double WpTire { get; set; }
+            public Result.enumShiftDirection Shift { get; set; }
         }
 
         private class StartProperties {

@@ -5,12 +5,15 @@ namespace FormulaD_Logic.Data {
         public Spot CurrentSpot { get; set; }
         public double ExpectedTurnsToWin { get; set; }
         public double ExpectedTireReduction { get; set; }
-        public enumGearChange SuggestedGearChange { get; set; }
+        public enumShiftDirection SuggestedGearChange { get; set; }
 
-        public enum enumGearChange {
-            ShiftUp,
-            ShiftDown,
-            Stay
+        public enum enumShiftDirection {
+            Down4 = -4,
+            Down3 = -3,
+            Down2 = -2,
+            Down = -1,
+            Stay = 0,
+            Up = 1
         }
     }
 
@@ -18,11 +21,11 @@ namespace FormulaD_Logic.Data {
         private Result[,,,,,,,] _results;
 
         public void Initialize(int maxLaps, int maxSpots, int maxTurnCounts, int maxWpTire, int maxWpBreaks, int maxWpGear, int maxWpEngines, int maxGear) {
-            _results = new Result[maxLaps, maxSpots, maxTurnCounts, maxWpTire, maxWpBreaks, maxWpGear, maxWpEngines, maxGear];
+            _results = new Result[maxLaps + 1, maxSpots, maxTurnCounts, maxWpTire, maxWpBreaks, maxWpGear, maxWpEngines, maxGear];
         }
 
         public Result this[int lap, int spot, int turnCount, int wpTire, int wpBreak, int wpGear, int wpEngine, int gear] {
-            get { return _results[lap - 1, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1]; }
+            get { return _results[lap, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1]; }
             set { _results[lap - 1, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1] = value; }
         }
     }

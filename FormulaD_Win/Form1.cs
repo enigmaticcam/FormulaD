@@ -13,11 +13,13 @@ namespace FormulaD_Win {
 
         private void button1_Click(object sender, EventArgs e) {
             Track track = new Monaco();
-            BuildResults results = new BuildResults(
+            var results = new ResultRef();
+            results.Initialize(track.MaxLaps, track.MaxSpots, track.MaxTurnCount, 15, 8, 8, 8, 6);
+            BuildResults buildResults = new BuildResults(
                 rolls: GetRolls(track),
-                results: new ResultRef(),
+                results: results,
                 track: track);
-            var result = results.Perform(186, 2);
+            buildResults.Perform(185);
         }
 
         private RollRef GetRolls(Track track) {
