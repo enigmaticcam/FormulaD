@@ -7,12 +7,10 @@ namespace FormulaD_Logic.Logic {
         private Track _track = new Monaco();
         private ResultRef _results = new ResultRef();
         private RollRef _rolls;
-        private int _laps;
         private StartProperties _start = new StartProperties();
-        private CostProperties _cost = new CostProperties();
-        private EndProperties _end = new EndProperties();
         private Score _bestScore = new Score();
         private Score _currentScore = new Score();
+        private AllScores _allScores = new AllScores();
 
         public enum enumShiftDirection {
             Down4 = -4,
@@ -81,8 +79,12 @@ namespace FormulaD_Logic.Logic {
 
         private void CalcExpectedValues(enumShiftDirection shift) {
             Die newDie = _track.Dice.GetByNum(_start.Die.DieNum + (int)shift);
+            _allScores.ExpectedTurnsToWin = 0;
+            _allScores.WpTire = 0;
             for (_start.MoveCount = newDie.DieMin; _start.MoveCount <= newDie.DieMax; _start.MoveCount++) {
                 PickBestMove(shift);
+                _allScores.ExpectedTurnsToWin += _bestScore.ExpectedTurnsToWin;
+                _allScores.WpTire += _bestScore.WpTire;
             }
         }
 
@@ -90,6 +92,7 @@ namespace FormulaD_Logic.Logic {
             _bestScore.AnyCost = uint.MaxValue;
             _bestScore.BringsCostBelowZero = 1;
             _bestScore.ExpectedTurnsToWin = double.MaxValue;
+            _bestScore.WpTire = 0;
             foreach (var roll in _rolls.RollsBySpotByDie(_start.SpotNumber, _start.MoveCount)) {
                 _start.Roll = roll;
                 _currentScore.AnyCost = 0;
@@ -107,13 +110,14 @@ namespace FormulaD_Logic.Logic {
 
         private void CalcTireReduction() {
             if (_start.Spot.IsTurn && _start.TurnCount < _start.Spot.TurnCount && _start.Roll.OvershootTurnCount > 0) {
-                _cost.WpTire = _start.Roll.OvershootCount;
-                if (_cost.WpTire > _start.WpTire && !_cost.AddedBelowZeroCostAlready) {
+                uint wpTire = _start.Roll.OvershootCount;
+                if (wpTire > _start.WpTire) {
                     _currentScore.BringsCostBelowZero = 1;
                 } else {
                     _currentScore.BringsCostBelowZero = 0;
                 }
-                _currentScore.AnyCost += _cost.WpTire;
+                _currentScore.AnyCost += wpTire;
+                _currentScore.WpTire = wpTire;
             }
         }
 
@@ -131,6 +135,12 @@ namespace FormulaD_Logic.Logic {
             _bestScore.BringsCostBelowZero = _currentScore.BringsCostBelowZero;
             _bestScore.ExpectedTurnsToWin = _currentScore.ExpectedTurnsToWin;
             _bestScore.CurrentRoll = _start.Roll;
+            _bestScore.WpTire = _currentScore.WpTire;
+        }
+
+        public class AllScores {
+            public double ExpectedTurnsToWin { get; set; }
+            public double WpTire { get; set; }
         }
 
         private class StartProperties {
@@ -147,20 +157,12 @@ namespace FormulaD_Logic.Logic {
             public Roll Roll { get; set; }
         }
 
-        private class CostProperties {
-            public bool AddedBelowZeroCostAlready { get; set; }
-            public uint WpTire { get; set; }
-        }
-
-        private class EndProperties {
-            public uint WpTire { get; set; }
-        }
-
         private class Score {
             public int BringsCostBelowZero { get; set; }
             public double ExpectedTurnsToWin { get; set; }
             public uint AnyCost { get; set; }
             public Roll CurrentRoll { get; set; }
+            public uint WpTire { get; set; }
         }
     }
 }
