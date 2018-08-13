@@ -1,7 +1,7 @@
 ﻿using FormulaD_Logic.Data;
 
-namespace FormulaD_Logic.Logic {
-    public class BuildResults {
+namespace FormulaD_Logic.Logic.Actions {
+    public class ActionBuildResults {
         private Track _track;
         private ResultRef _results;
         private RollRef _rolls;
@@ -12,38 +12,34 @@ namespace FormulaD_Logic.Logic {
         private AllScores _currentAllScores = new AllScores();
         private AllScores _bestAllScores = new AllScores();
 
-        public BuildResults(RollRef rolls, ResultRef results, Track track) {
+        public ActionBuildResults(RollRef rolls, ResultRef results, Track track) {
             _rolls = rolls;
             _results = results;
             _track = track;
         }
 
-        public void Perform(int spotNumber) {
+        public void Perform(int spotNumber, int lap) {
             _start.SpotNumber = spotNumber;
+            _start.Lap = lap;
             FindAllStartingPossibilities();
+            _results.AddSpotCompleted(spotNumber, lap);
         }
 
         private void FindAllStartingPossibilities() {
             _start.Spot = _track.Grid.GetBySpotNumber(_start.SpotNumber);
-            for (_start.Lap = 0; _start.Lap <= _track.MaxLaps; _start.Lap++) {
-                if (_start.Lap == 2) { // --------------Testing----------------
-                    for (_start.WpTire = 0; _start.WpTire <= 14; _start.WpTire++) {
-                        for (_start.WpBreaks = 0; _start.WpBreaks <= 7; _start.WpBreaks++) {
-                            for (_start.WpGear = 0; _start.WpGear <= 7; _start.WpGear++) {
-                                for (_start.WpEngine = 0; _start.WpEngine <= 7; _start.WpEngine++) {
-                                    for (_start.TurnCount = 0; _start.TurnCount <= _start.Spot.TurnCount; _start.TurnCount++) {
-                                        foreach (var die in _track.Dice.Enumerate) {
-                                            _start.Die = die;
-                                            ChooseBestShiftAction();
-                                        }
-                                    }
-
+            for (_start.WpTire = 0; _start.WpTire <= 14; _start.WpTire++) {
+                for (_start.WpBreaks = 0; _start.WpBreaks <= 7; _start.WpBreaks++) {
+                    for (_start.WpGear = 0; _start.WpGear <= 7; _start.WpGear++) {
+                        for (_start.WpEngine = 0; _start.WpEngine <= 7; _start.WpEngine++) {
+                            for (_start.TurnCount = 0; _start.TurnCount <= _start.Spot.TurnCount; _start.TurnCount++) {
+                                foreach (var die in _track.Dice.Enumerate) {
+                                    _start.Die = die;
+                                    ChooseBestShiftAction();
                                 }
                             }
                         }
                     }
                 }
-                
             }
         }
 
@@ -124,14 +120,14 @@ namespace FormulaD_Logic.Logic {
             if (_currentScore.BringsCostBelowZero == 1) {
                 _currentScore.ExpectedTurnsToWin = int.MaxValue;
             } else if (_start.Lap == _track.MaxLaps && _start.Roll.DoesCrossFinish) {
-                _currentScore.ExpectedTurnsToWin = 1;
+                _currentScore.ExpectedTurnsToWin = 0;
             } else {
-                var result = GetResultAfterCost();
-                if (result == null) {
-                    BuildResults buildResults = new BuildResults(_rolls, _results, _track);
-                    buildResults.Perform(_start.Roll.EndSpot);
-                    result = GetResultAfterCost();
+                int lap = (_start.Roll.DoesCrossFinish ? _start.Lap + 1 : _start.Lap);
+                if (!_results.IsSpotCompleted(_start.Roll.EndSpot, lap)) {
+                    ActionBuildResults action = new ActionBuildResults(_rolls, _results, _track);
+                    action.Perform(_start.Roll.EndSpot, lap);
                 }
+                var result = GetResultAfterCost();
                 _currentScore.ExpectedTurnsToWin = 1 + result.ExpectedTurnsToWin;
             }
         }

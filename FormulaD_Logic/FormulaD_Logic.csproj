@@ -49,7 +49,8 @@
     <Compile Include="Data\Spot.cs" />
     <Compile Include="Data\Track.cs" />
     <Compile Include="Logic\Actions\ActionGenerateRolls.cs" />
-    <Compile Include="Logic\Logic.cs" />
+    <Compile Include="Logic\Actions\ActionBuildResults.cs" />
+    <Compile Include="Logic\Engine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

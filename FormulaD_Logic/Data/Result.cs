@@ -22,6 +22,7 @@ namespace FormulaD_Logic.Data {
 
     public class ResultRef {
         private Result[,,,,,,,] _results;
+        private Dictionary<int, HashSet<int>> _spotsCompleted = new Dictionary<int, HashSet<int>>();
 
         public void Initialize(int maxLaps, int maxSpots, int maxTurnCounts, int maxWpTire, int maxWpBreaks, int maxWpGear, int maxWpEngines, int maxGear) {
             _results = new Result[maxLaps + 1, maxSpots + 1, maxTurnCounts + 1, maxWpTire, maxWpBreaks, maxWpGear, maxWpEngines, maxGear];
@@ -30,6 +31,17 @@ namespace FormulaD_Logic.Data {
         public Result this[int lap, int spot, int turnCount, int wpTire, int wpBreak, int wpGear, int wpEngine, int gear] {
             get { return _results[lap, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1]; }
             set { _results[lap, spot - 1, turnCount, wpTire, wpBreak, wpGear, wpEngine, gear - 1] = value; }
+        }
+
+        public void AddSpotCompleted(int spot, int lap) {
+            if (!_spotsCompleted.ContainsKey(lap)) {
+                _spotsCompleted.Add(lap, new HashSet<int>());
+            }
+            _spotsCompleted[lap].Add(spot);
+        }
+
+        public bool IsSpotCompleted(int spot, int lap) {
+            return (_spotsCompleted.ContainsKey(lap) ? _spotsCompleted[lap].Contains(spot) : false);
         }
     }
 }

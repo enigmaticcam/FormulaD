@@ -55,7 +55,7 @@ namespace FormulaD_Logic.Logic.Actions {
                                     if (!SeenBefore(roll.SpotStart, chain.StopNumberTo, moveCount) && CanMoveDirection(roll.Direction, chain.Direction)) {
                                         AddRoll(new RollTemplate() {
                                             Direction = CombineDirections(roll.Direction, chain.Direction),
-                                            DoesCrossFinish = roll.DoesCrossFinish,
+                                            DoesCrossFinish = roll.DoesCrossFinish || (_grid.GetBySpotNumber(chain.StopNumberTo).IsFinish && !_grid.GetBySpotNumber(chain.StopNumberFrom).IsFinish),
                                             OvershootCount = overshootCount,
                                             OvershootTurnCount = overshootTurnCount,
                                             MoveCount = moveCount,
