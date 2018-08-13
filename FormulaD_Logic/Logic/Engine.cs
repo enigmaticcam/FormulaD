@@ -15,7 +15,7 @@ namespace FormulaD_Logic.Logic {
                 rolls: GetRolls(track),
                 results: results,
                 track: track);
-            action.Perform(351, 2);
+            action.Perform(331, 2);
             bool stophere = true;
         }
 

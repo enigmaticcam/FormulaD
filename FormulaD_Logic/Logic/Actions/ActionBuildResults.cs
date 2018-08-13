@@ -1,4 +1,5 @@
 ﻿using FormulaD_Logic.Data;
+using System;
 
 namespace FormulaD_Logic.Logic.Actions {
     public class ActionBuildResults {
@@ -31,7 +32,11 @@ namespace FormulaD_Logic.Logic.Actions {
                 for (_start.WpBreaks = 0; _start.WpBreaks <= 7; _start.WpBreaks++) {
                     for (_start.WpGear = 0; _start.WpGear <= 7; _start.WpGear++) {
                         for (_start.WpEngine = 0; _start.WpEngine <= 7; _start.WpEngine++) {
-                            for (_start.TurnCount = 0; _start.TurnCount <= _start.Spot.TurnCount; _start.TurnCount++) {
+                            int startTurnCount = 0;
+                            if (_start.Spot.IsTurn) {
+                                startTurnCount = 1;
+                            }
+                            for (_start.TurnCount = startTurnCount; _start.TurnCount <= _start.Spot.TurnCount; _start.TurnCount++) {
                                 foreach (var die in _track.Dice.Enumerate) {
                                     _start.Die = die;
                                     ChooseBestShiftAction();
@@ -148,12 +153,20 @@ namespace FormulaD_Logic.Logic.Actions {
             return _results[
                 _start.Lap,
                 _start.Roll.EndSpot,
-                _start.TurnCount,
+                GetNextTurnCount(),
                 _start.WpTire - _currentScore.WpTire,
                 _start.WpBreaks - _cost.WpBreaks,
                 _start.WpGear - _cost.WpGear,
                 _start.WpEngine - _cost.WpEngine,
                 _start.Die.DieNum];
+        }
+
+        private int GetNextTurnCount() {
+            if (_start.Spot.IsTurn) {
+                return Math.Min(_start.Spot.TurnCount, _start.TurnCount + 1);
+            } else {
+                return 0;
+            }
         }
 
         private void SetBestScore() {
